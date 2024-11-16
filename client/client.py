@@ -35,6 +35,28 @@ def main():
         except grpc.RpcError as e:
             print(f"Error obteniendo la lista de peers: {e.details()} (código: {e.code()})")
 
+    # Solicitar chunk desde un peer
+    request_chunk_from_peer()
+
+def request_chunk_from_peer():
+    """
+    Solicita un fragmento específico de un archivo desde un peer.
+    """
+    with grpc.insecure_channel('localhost:50052') as channel:
+        peer_stub = bittorrent_pb2_grpc.PeerServiceStub(channel)
+        
+        # Solicita el fragmento 0 del archivo "example.txt"
+        print("Solicitando chunk del peer...")
+        try:
+            response = peer_stub.RequestChunk(
+                bittorrent_pb2.ChunkRequest(
+                    file_name="example.txt",
+                    chunk_index=0
+                )
+            )
+            print(f"Chunk recibido (index {response.chunk_index}): {response.content.decode()}")
+        except grpc.RpcError as e:
+            print(f"Error solicitando el chunk: {e.details()} (código: {e.code()})")
+
 if __name__ == "__main__":
     main()
-
